@@ -1,46 +1,82 @@
 import javax.swing.JOptionPane;
+import java.util.ArrayList;
 
 public class Calcolatrice {
+
     public static void main(String[] args) {
-        try {
-            // Finestra per il primo numero
-            String s1 = JOptionPane.showInputDialog("Inserisci il primo numero:");
-            if (s1 == null) return; // Gestisce il tasto Annulla
-            double n1 = Double.parseDouble(s1);
+        ArrayList<String> cronologia = new ArrayList<>();
+        boolean continua = true;
 
-            // Finestra per l'operatore
-            String op = JOptionPane.showInputDialog("Operazione (+, -, *, /, ^):");
-            if (op == null) return;
+        // Messaggio di benvenuto grafico
+        JOptionPane.showMessageDialog(null, "--- Calcolatricejava---\nMemoria Attiva", "Calcolatricejava", JOptionPane.INFORMATION_MESSAGE);
 
-            // Finestra per il secondo numero
-            String s2 = JOptionPane.showInputDialog("Inserisci il secondo numero:");
-            if (s2 == null) return;
-            double n2 = Double.parseDouble(s2);
+        while (continua) {
+            String[] opzioni = {"+", "-", "*", "/", "sqrt", "pow", "history", "exit"};
+            
+            // Creiamo il menù a tendina grafico
+            String scelta = (String) JOptionPane.showInputDialog(null, 
+                    "Cosa vuoi fare?", 
+                    "Menù Calcolatrice", 
+                    JOptionPane.QUESTION_MESSAGE, 
+                    null, opzioni, opzioni[0]);
 
-            double risultato = 0;
-            boolean operazioneValida = true;
-
-            // Logica potenziata
-            switch (op) {
-                case "+": risultato = n1 + n2; break;
-                case "-": risultato = n1 - n2; break;
-                case "*": risultato = n1 * n2; break;
-                case "/": 
-                    if (n2 != 0) risultato = n1 / n2; 
-                    else { JOptionPane.showMessageDialog(null, "Errore: Divisione per zero!"); operazioneValida = false; }
-                    break;
-                case "^": risultato = Math.pow(n1, n2); break; // Aggiunta potenza
-                default:
-                    JOptionPane.showMessageDialog(null, "Operatore non valido!");
-                    operazioneValida = false;
+            if (scelta == null || scelta.equals("exit")) {
+                continua = false;
+                break;
             }
 
-            if (operazioneValida) {
-                JOptionPane.showMessageDialog(null, "Il risultato di " + n1 + " " + op + " " + n2 + " è: " + risultato);
+            if (scelta.equals("history")) {
+                StringBuilder historyText = new StringBuilder("--- Cronologia ---\n");
+                if (cronologia.isEmpty()) {
+                    historyText.append("Vuota.");
+                } else {
+                    for (String riga : cronologia) {
+                        historyText.append(riga).append("\n");
+                    }
+                }
+                JOptionPane.showMessageDialog(null, historyText.toString(), "Memoria", JOptionPane.PLAIN_MESSAGE);
+                continue;
             }
 
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(null, "Errore: Inserisci solo numeri validi!");
+            try {
+                double risultato = 0;
+                String operazioneEffettuata = "";
+
+                if (scelta.equals("sqrt")) {
+                    String input = JOptionPane.showInputDialog("Inserisci il numero per la radice:");
+                    double num = Double.parseDouble(input);
+                    if (num < 0) throw new ArithmeticException("Radice di numero negativo!");
+                    risultato = Math.sqrt(num);
+                    operazioneEffettuata = "√" + num + " = " + risultato;
+                } 
+                else if (scelta.equals("pow")) {
+                    double base = Double.parseDouble(JOptionPane.showInputDialog("Inserisci la base:"));
+                    double esp = Double.parseDouble(JOptionPane.showInputDialog("Inserisci l'esponente:"));
+                    risultato = Math.pow(base, esp);
+                    operazioneEffettuata = base + " ^ " + esp + " = " + risultato;
+                } 
+                else {
+                    double n1 = Double.parseDouble(JOptionPane.showInputDialog("Primo numero:"));
+                    double n2 = Double.parseDouble(JOptionPane.showInputDialog("Secondo numero:"));
+
+                    switch (scelta) {
+                        case "+": risultato = n1 + n2; operazioneEffettuata = n1 + " + " + n2 + " = " + risultato; break;
+                        case "-": risultato = n1 - n2; operazioneEffettuata = n1 + " - " + n2 + " = " + risultato; break;
+                        case "*": risultato = n1 * n2; operazioneEffettuata = n1 + " * " + n2 + " = " + risultato; break;
+                        case "/": 
+                            if (n2 == 0) throw new ArithmeticException("Divisione per zero!");
+                            risultato = n1 / n2; 
+                            operazioneEffettuata = n1 + " / " + n2 + " = " + risultato; 
+                            break;
+                    }
+                }
+
+                JOptionPane.showMessageDialog(null, "Risultato: " + risultato);
+                cronologia.add(operazioneEffettuata);
+
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, "Errore: " + e.getMessage(), "Ops!", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 }
